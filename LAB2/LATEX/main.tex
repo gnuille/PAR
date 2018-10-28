@@ -1,6 +1,7 @@
 
 
 \documentclass{article}
+\usepackage{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{listings}
@@ -122,6 +123,7 @@ From the graph we can observe that we get 8 non-dependant tasks, one for each ro
 After analyzing the two versions we find out that with a point based strategy the number of tasks is: $w^2$ . In our case w is 8 so the number of tasks is 64, this number can increase to really high values in default executions and can be really problematic due to task creation and work distribution overheads. In the other hand we find out that row granularity the number of task linearly increase with w, which may be a more affordable value. This general guidelines and ideas will be taken into account for the next sections.
 \end{flushleft}
 \subsection{Graphical version analysis}
+\label{sec:graphical}
 \begin{flushleft}
 Once the granularity of the computation itself is evaluated, we will be analyzing the graphical version. For this purpose we will be using the same source code as in the previous subsection (\textit{code/tareador/mandel-tar-row.c}) but we will be compiling using the \textit{mandeld-tar} Makefile target. 
 \end{flushleft}
@@ -139,9 +141,9 @@ The image is rotated for document structuring purpose. The full non-rotated imag
 \begin{flushleft}
 We can observe that due to dependencies the graph is now serialized, if we look into the edges between tasks in tareador we can see that a graphics library variable is now needed between iterations. This is causing the serialization of the graph.
 \end{flushleft}
-\begin{figure}[ht]
+\begin{figure}[h]
     \centering
-    \includegraphics[width=0.43\textwidth]{mandeld-tar-edge.png}
+    \includegraphics[width=0.32\textwidth]{mandeld-tar-edge.png}
     \caption{Variable usage between tasks}
     \label{fig:mandeldtaredge}
 \end{figure}
@@ -167,7 +169,36 @@ Specially what is causing serialization is the inner if statement. In the follow
 \end{lstlisting}
 \newpage
 \section{Parallelization strategies implementation}
-\section{Performance evaluation}
+In this section we are going to present the implementation of both strategies in \textit{OpenMP}
+\subsection{Point decomposition in \textit{OpenMP}}
+For this strategy we went through a few versions. Starting with the initial version and making improvements.
+\subsubsection*{Initial version}
+The initial version was given in the assignment and its:
+\begin{lstlisting}
+    for (row = 0; row < height; ++row) {
+        #pragma omp parallel
+        #pragma omp single
+        for (col = 0; col < width; ++col) {
+            #pragma omp task firstprivate(col)
+
+\end{lstlisting}
+\begin{flushleft}
+In this version we introduced the firsprivate pragma which tells the compiler that the col variable inside the construct is a new variable initialized to the same original variable value.
+\end{flushleft}
+\begin{flushleft}
+Also notate that in the full code \textit{code/omp/mandel-omp-initial.c} we added the \textit{\#pragma omp critical} clause in the region that generated dependencies, see: \hyperref[sec:graphical]{\textit{graphical version analysis}}.
+\end{flushleft}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{strongPoint.png}
+    \caption{Strong scalability plots for initial version}
+    \label{fig:strongpoint}
+\end{figure}
+\begin{flushleft}
+We can observe that the speedup poorly improves with the increase of \#threads that's due to the version not being optimized as we create a lot of tasks and the work distribution takes into serious overheads.
+\end{flushleft}
+\section{Performance comparison}
 \section{Conclusions}
 
 \end{document}
