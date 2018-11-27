@@ -1,0 +1,20 @@
+%introduction
+\section{Introducion}
+\justify
+In this labaratory assignement we will be working with the \nq problem.
+This problem states that we have to find all possible solutions for
+placing \nq in an $N \times N$ chessboard so that each queen can't
+attack any of the other queens placed.
+\justify
+The workarround for this problem is to use a \bab technique. 
+This technique tries all possible combinations with a recursive
+algorithm using a backtracking aproach.
+\justify
+Take into account that the computational cost of this problem is expensive 
+by reason of it has to compute all combinations in a chess board. 
+For example, in an $8 \times 8$ chess board the algorithm tries ${64 \choose 8}$ 
+combinations, aproximately \num{4.42e9}.
+\justify
+Consequently, we will be analysing the potential parallelism of the \nq problem
+and proposing a parallel version of the code, hopefully improving it's 
+performance.
