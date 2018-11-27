@@ -7,6 +7,9 @@ Parallelism labs, reports and codes
   * Optimitzation of paralel version of fast fourier transform using openMP and Paraver
 * Lab 2
   * Mandelbrot computation analysis 
-  * Point decomposition with openMP
-  * Row decomposition with openMP
-  
+  * Point decomposition with OpenMP
+  * Row decomposition with OpenMP
+* Lab 3
+  * Task decomposition analysis of Divide and conquer algorithm
+  * Implementation in OpenMP: Leaf and tree strategy
+  * Tree strategy cutoff mechanism and depend thread synchronization mechanism
