@@ -1,0 +1,13 @@
+%performance evaluation
+\section{Performance evaluation}
+\justify
+In this section we are going to evaluate our parallel approach, generate and comment some graphs and also implement a cut-off mechanism.
+\subsection{Cut-off mechanism}
+The execution time of the last version is 1.065s. If we compare it to the execution time of the serial version, 0.942s, we can see that the performance got a 13\% worse. This is caused by the serious overheads of task creation and synchronization plus the memory copy of each thread. In order to get a better performance and as we seen on previous laboratories, we are going to implement a cut-off mechanism.
+\justify
+We only have on pragma creating tasks, so the cut-off will be fairly easy to implement. To control how deep we are in the recursion tree we don't need to add an extra variable, since the \textit{j} parameter already gives us that information. We used this value to implement a final clause in our task creation pragma, so once it reaches a certain level it stops creating more tasks.   
+\begin{lstlisting}
+#pragma omp task final(j >= cutoff) mergeable
+\end{lstlisting}
+
+%FALTA : MIRAR QUANT CUTOFF VAM FER SERVIR PEL TEMPS 0.749 I MIRAR COM FER LO DEL OPTIMAL..CREC QUE TENIEM LSCRIPT FET JA
