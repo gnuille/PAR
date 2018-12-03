@@ -1,3 +1,5 @@
+
+\definecolor{light-gray}{gray}{0.80}
 %parallelization strategy
 \section{Parallelization strategy}
 \justify
@@ -6,9 +8,9 @@ After evaluating the task decomposition and choosing which region we are going t
 \subsection{Task creation and synchronization}
 Looking at the code it's clear that the tree strategy will be more suited to the problem, since the base case doesn't do a huge amount of calculations and each recursive call does parallelizable work (a for-loop and memory copy), so creating tasks as we go through the recursion will increase the performance.
 \justify
-In the following code you can see our initial approach:
+In the following code you can see our initial approach (keep in mind that this version isn't finished yet):
 
-\begin{lstlisting}
+\begin{lstlisting}[escapechar=@]
 void nqueens(int n, int j, char *a) {
     int i;
     if (n == j) {
@@ -19,7 +21,7 @@ void nqueens(int n, int j, char *a) {
         sol_count += 1;
     } else {
         for ( i=0 ; i < n ; i++ ) {
-            #pragma omp task
+            @\smash{\colorbox{light-gray}{\#pragma omp task}}@
             {
                 char * new_a = alloca(n * sizeof(char));
                 memcpy(new_a, a, j*sizeof(char));
@@ -29,31 +31,33 @@ void nqueens(int n, int j, char *a) {
                 }
             }
         }
-        #pragma omp taskwait
+        @\smash{\colorbox{light-gray}{\#pragma omp taskwait}}@
     }
 }
 \end{lstlisting}
 \justify
-We decided to create one task for each iteration of the for-loop and then, to satisfy dependences, synchronize them at the end of the loop with a taskwait. One important change from the initial version is the use of \textbf{\textit{alloca}} and \textbf{\textit{memcpy}}. Each task is reading and writing the memory to check if the possible position of the queen is correct, and each of them has to do so independenly from other tasks, so what we have chosen to do to solve the problem is to copy the vector \textbf{\textit{a}} for each task. This will give us some overhead, as copying memory is not a fast operation.
+We decided to create one task for each iteration of the for-loop and then, to satisfy dependences, synchronize them at the end of the loop with a taskwait. One important change from the initial version is the use of \texttt{alloca} and \texttt{memcpy}. Each task is reading and writing the memory to check if the possible position of the queen is correct, and each of them has to do so independenly from other tasks, so what we have chosen to do to solve the problem is to copy the vector \texttt{a} for each task. This will give us some overhead, as copying memory is not a fast operation.
 \justify
 
 \subsection{Race conditions}
 Having finished the task creation and synchronization of the code, there is still work to do. The last version of the code doesn't give the correct result yet due to two race conditions. The first one and the easier to solve is the increment of the solution counter variable. This global variable is read and then written by each task, and since two of them can access it at the same time (giving a different outcome depending on the order) we are in front of a race condition problem.
 \justify
-To solve it, we placed a \textbf{\textit{\#pragma omp atomic}} before the operation so we guarantee that only one thread is doing the increment at a time.
-\begin{lstlisting}
-#pragma omp atomic
-sol_count += 1;
+To solve it, we placed a \texttt{\#pragma omp atomic} before the operation so we guarantee that only one thread is doing the increment at a time.
+\begin{lstlisting}[escapechar=@]
+    }
+    @\smash{\colorbox{light-gray}{\#pragma omp atomic}}@
+    sol_count += 1;
+} else {
 \end{lstlisting}
 \justify
 With this change, the execution of the code gives the correct answer to the problem regarding the total number of possible solutions. However, it doesn't print the same solution each time and looking at the code, the solution may even we wrong.
 \justify
-This is due to the second race condition. Two or more threads can enter the \textbf{\textit{if (sol==NULL)}} part of the base case. Not only will this threads be the same each time (since it depends on how fast they traveled the recursive tree) but they can be copying the memory a the same time, giving a mixed solution (some parts of the solution of one thread and some parts of another one).
+This is due to the second race condition. Two or more threads can enter the \texttt{if (sol==NULL)} part of the base case. Not only will this threads be the same each time (since it depends on how fast they traveled the recursive tree) but they can be copying the memory a the same time, giving a mixed solution (some parts of the solution of one thread and some parts of another one).
 \justify
 The initial fix to this problem is to declare a critical region that protects the whole if statement. This would work fine, but it has some overhead. each thread that gets to the base case will have to synchronize and wait to check the condition, even though we know that once a solution is found it will never be false again. We can optimize it doing a double-check before entering the critical zone : 
-\begin{lstlisting}
-if( sol == NULL ) {
-    #pragma omp critical
+\begin{lstlisting}[escapechar=@]
+@\smash{\colorbox{light-gray}{if( sol == NULL )\{ }}@
+    @\smash{\colorbox{light-gray}{\#pragma omp critical}}@
     if( sol == NULL ){
         sol = malloc(n * sizeof(char));
         memcpy(sol, a, n * sizeof(char));
@@ -91,6 +95,73 @@ void nqueens(int n, int j, char *a) {
             }
         }
         #pragma omp taskwait
+    }
+}
+\end{lstlisting}
+\subsection{Worksharing constructs}
+\justify
+Finally we tried to implement a version of the code using worksharing constructs. 
+Getting the code working is not an easy job.Since it's within a recursive function, we have to take into a account that parallel regions cannot be nested so we need to declare one \texttt{\#pragma omp parallel} before each construct.
+\justify
+First of all we implemented an initial version using a \texttt{taskloop} construct as a middle step for our objective.
+\begin{lstlisting}[escapechar=@]
+		/* try each possible position for queen <j> */
+		@\smash{\colorbox{light-gray}{\#pragma omp parallel}}@
+		@\smash{\colorbox{light-gray}{\#pragma omp  taskloop final\(j >= cutoff\) mergeable}}@
+		for ( i=0 ; i < n ; i++ ) {
+			char * new_a = alloca(n * sizeof(char));
+			memcpy(new_a, a, j*sizeof(char));
+			new_a[j] = (char) i;
+			if (ok(j + 1, new_a)) {
+				nqueens(n, j + 1, new_a);
+			}
+		}
+	}
+}
+\end{lstlisting}
+\justify
+The transition from the \texttt{taskloop} version to the worksharing construct was not easy. 
+\justify
+As the for OpenMP construct has no final or if clauses, for implementing the cutoff mechanism we must change the schedule of the for in runtime. For doing so, we included a if mechanism that in runtime checks if the depth exceeds the cutoff and then runs an static version of the for or an OpenMP instrumented one. 
+\justify
+The version using worksharing constructs looks like:
+\begin{lstlisting}
+void nqueens(int n, int j, char *a) {
+	int i;
+	if (n == j) {
+		/* put good solution in heap. */
+		if( sol == NULL ) {
+			#pragma omp critical
+			if( sol == NULL ){
+				sol = malloc(n * sizeof(char));
+				memcpy(sol, a, n * sizeof(char));
+			}
+		}
+		#pragma omp atomic
+		sol_count += 1;
+	} else {
+		/* try each possible position for queen <j> */
+        if(j>=cutoff){
+            for ( i=0 ; i < n ; i++ ) {
+                char * new_a = alloca(n * sizeof(char));
+                memcpy(new_a, a, j*sizeof(char));
+                new_a[j] = (char) i;
+                if (ok(j + 1, new_a)) {
+                    nqueens(n, j + 1, new_a);
+                }
+            }
+        }else{
+            #pragma omp parallel
+            #pragma omp for 
+            for ( i=0 ; i < n ; i++ ) {
+                char * new_a = alloca(n * sizeof(char));
+                memcpy(new_a, a, j*sizeof(char));
+                new_a[j] = (char) i;
+                if (ok(j + 1, new_a)) {
+                    nqueens(n, j + 1, new_a);
+                }
+            }
+        }
     }
 }
 \end{lstlisting}
