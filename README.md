@@ -13,3 +13,7 @@ Parallelism labs, reports and codes
   * Task decomposition analysis of Divide and conquer algorithm
   * Implementation in OpenMP: Leaf and tree strategy
   * Tree strategy cutoff mechanism and depend thread synchronization mechanism
+* Lab 4
+  * Analyisis of a branch and bound task decomposition
+  * Implementation in OpenMP: Using tasks and worksharing constructs
+  * Performance evaluation
