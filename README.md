@@ -1,6 +1,12 @@
 # PAR
 Parallelism labs, reports and codes
 
+## Authors
+Pablo Vizcaino Serrano ([Github](github.com/pabloviz))
+
+Guillem Ramirez Miranda ([Github](github.com/teleportex))
+
+## Contents
 * Lab 1
   * Pi calculation descomposition
   * Tareador analisis of fast fourier transform
