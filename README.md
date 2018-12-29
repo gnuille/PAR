@@ -17,3 +17,8 @@ Parallelism labs, reports and codes
   * Analyisis of a branch and bound task decomposition
   * Implementation in OpenMP: Using tasks and worksharing constructs
   * Performance evaluation
+* Lab 5
+  * Analysis of heat difussion algorithms
+  * Geometric data decomposition of Jacobi heat difussion algorithm
+  * Geometric data decomposition of Gauss-Seide heat difussion algorithm
+  * Performance evaluation
