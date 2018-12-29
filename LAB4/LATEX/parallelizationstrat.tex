@@ -107,7 +107,7 @@ First of all we implemented an initial version using a \texttt{taskloop} constru
 \begin{lstlisting}[escapechar=@]
 		/* try each possible position for queen <j> */
 		@\smash{\colorbox{light-gray}{\#pragma omp parallel}}@
-		@\smash{\colorbox{light-gray}{\#pragma omp  taskloop final\(j >= cutoff\) mergeable}}@
+		@\smash{\colorbox{light-gray}{\#pragma omp  taskloop final(j >= cutoff) mergeable}}@
 		for ( i=0 ; i < n ; i++ ) {
 			char * new_a = alloca(n * sizeof(char));
 			memcpy(new_a, a, j*sizeof(char));
