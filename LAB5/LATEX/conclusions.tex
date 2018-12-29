@@ -1,0 +1,15 @@
+\section{Conclusions}
+
+\justify
+In this laboratory assignment we took a loop at data decomposition approach which gave us a different point of view when parallelizing a program.
+\justify
+On the Jacobi algorithm we saw how important is it to not limit the parallelization arbitrarily and also to parallelize all the posible code (p.e the copy\_mat function)
+
+\justify
+We also learned that there are trade-offs between parallelization, i.e when a lot of tasks are created we express dependencies as they are, but we loose a lot of performance due to overheads.
+
+\justify
+Other things that we learned is that there is not a perfect solution for everything, in the first session we thought that we could find out a perfect solution with a good scallability, after a few hours of work we learned that not everything is perfectly parallelizable. 
+
+\justify
+Another problem that we encountered is trying to do a data parallelization where there's dependencies between data blocks. There are many ways to go over it,  but most of them cause a big overhead.

@@ -1,0 +1,54 @@
+\documentclass{article}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{ragged2e}
+\usepackage{listings}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{color}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{capt-of}
+\usepackage{csvsimple}
+\usepackage{definitions}
+\lstset { %
+    language=C,
+    backgroundcolor=\color{black!5}, % set backgroundcolor
+    basicstyle=\footnotesize,% basic font setting
+}
+\graphicspath{{img/}} 
+\begin{document}
+\include{titlepage}
+\clearpage
+\tableofcontents
+\clearpage 
+
+%introduction
+\include{introduction}
+\clearpage
+
+\include{tareador}
+\clearpage
+
+\include{jacobi}
+\clearpage
+
+\include{gauss}
+\clearpage
+
+\include{conclusions}
+\clearpage
+
+%%%%%%%%%%%%%img example%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\iffalse
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{tareador1.png}
+    \caption{Tareador task decomposition graph}
+    \label{fig:tareador}
+\end{figure}
+\fi
+\end{document}
