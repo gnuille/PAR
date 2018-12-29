@@ -2,9 +2,9 @@
 Parallelism labs, reports and codes
 
 ## Authors
-Pablo Vizcaino Serrano ([Github](github.com/pabloviz))
+Pablo Vizcaino Serrano ([Github](https://github.com/pabloviz))
 
-Guillem Ramirez Miranda ([Github](github.com/teleportex))
+Guillem Ramirez Miranda ([Github](https://github.com/teleportex))
 
 ## Contents
 * Lab 1
